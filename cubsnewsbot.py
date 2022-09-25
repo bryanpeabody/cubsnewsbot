@@ -82,3 +82,4 @@ if pushover_token is not None and pushover_user_id is not None:
     check_mlb_api(pushover_token, pushover_user_id)
 else:
     print("ERROR! Environment varibles are not set!")
+
