@@ -1,13 +1,24 @@
 from datetime import datetime, timedelta
 import requests
 import os
+from pathlib import Path
 
 #
 # Removes previous days sent messages file.
 #
-def clean_up_files():
-    day = datetime.today() - timedelta(days=1)
-    filename = "./txt/" + day.strftime("%Y-%m-%d") + ".txt"
+def getToday():
+    return datetime.now().strftime("%Y-%m-%d")
+
+def manage_files():
+    filename = "./txt/" + getToday() + ".txt"
+
+    # Make sure today has a file
+    if not os.path.exists(filename):
+        Path(filename).touch()
+
+    # Clean up old files
+    yesterday = datetime.today() - timedelta(days=1)
+    filename = "./txt/" + yesterday.strftime("%Y-%m-%d") + ".txt"
 
     try:
         os.remove(filename)
@@ -17,7 +28,7 @@ def clean_up_files():
 # Checks if a passed in text exists in the sent messages file.
 #
 def does_exist_in_sent_messages(whathappened):
-    filename = "./txt/" + datetime.now().strftime("%Y-%m-%d") + ".txt"
+    filename = "./txt/" + getToday() + ".txt"
 
     with open(filename,'r') as f:
         if whathappened in f.read():
@@ -29,7 +40,7 @@ def does_exist_in_sent_messages(whathappened):
 # Updates the sent messages file.
 #
 def update_sent_messages(whathappened):
-    filename = "./txt/" + datetime.now().strftime("%Y-%m-%d") + ".txt"
+    filename = "./txt/" + getToday() + ".txt"
 
     with open(filename,'a+') as f:
         f.writelines(whathappened + "\n")
@@ -39,7 +50,7 @@ def update_sent_messages(whathappened):
 #
 def check_mlb_api(pushover_token, pushover_user_id):
     # Setup today's date0 as YYYY-MM-DD
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = getToday()
 
     # Define the API endpoint
     mlb_api = "https://statsapi.mlb.com/api/v1/transactions?teamId=112&startDate=" + today + "&endDate=" + today
@@ -71,7 +82,7 @@ def check_mlb_api(pushover_token, pushover_user_id):
 # Entry point
 #
 # Cleanup previous day's file.
-clean_up_files()
+manage_files()
 
 # Get environment varibles.
 pushover_token = os.getenv('PUSHOVER_TOKEN')
